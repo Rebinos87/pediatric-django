@@ -1,0 +1,101 @@
+{% extends 'base.html' %}
+
+{% block title %}Dashboard | Pediatric Growth System{% endblock %}
+
+{% block content %}
+<div class="row g-3 mb-3">
+  <div class="col-md-4">
+    <div class="card">
+      <div class="card-body">
+        <div class="d-flex justify-content-between align-items-center">
+          <div>
+            <div class="text-muted small text-uppercase">Total Patients</div>
+            <div class="fs-3 fw-bold">{{ total_patients }}</div>
+          </div>
+          <div class="btn btn-sm btn-outline-primary rounded-pill">
+            <a href="{% url 'patient_create' %}" class="text-decoration-none">+ New Patient</a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="col-md-4">
+    <div class="card">
+      <div class="card-body">
+        <div class="text-muted small text-uppercase">Measurements</div>
+        <div class="fs-3 fw-bold">{{ total_measurements }}</div>
+        <div class="small text-muted">Recorded entries</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="row g-3">
+  <div class="col-lg-6">
+    <div class="card h-100">
+      <div class="card-header d-flex justify-content-between align-items-center">
+        <span class="fw-semibold">Recent Patients</span>
+      </div>
+      <div class="card-body p-0">
+        <table class="table table-hover mb-0">
+          <thead class="table-light">
+            <tr>
+              <th>Name</th>
+              <th>Gender</th>
+              <th>Registered</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for p in recent_patients %}
+            <tr>
+              <td><a href="{% url 'patient_detail' p.pk %}">{{ p.patient_name }}</a></td>
+              <td>{{ p.gender }}</td>
+              <td>{{ p.date_registered|date:"Y-m-d" }}</td>
+            </tr>
+            {% empty %}
+            <tr>
+              <td colspan="3" class="text-center text-muted py-3">No patients yet.</td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <div class="col-lg-6">
+    <div class="card h-100">
+      <div class="card-header">
+        <span class="fw-semibold">Recent Measurements</span>
+      </div>
+      <div class="card-body p-0">
+        <table class="table table-hover mb-0">
+          <thead class="table-light">
+            <tr>
+              <th>Patient</th>
+              <th>Date</th>
+              <th>Height (cm)</th>
+              <th>Weight (kg)</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for m in recent_measurements %}
+            <tr>
+              <td><a href="{% url 'patient_detail' m.patient.pk %}">{{ m.patient.patient_name }}</a></td>
+              <td>{{ m.measurement_date|date:"Y-m-d" }}</td>
+              <td>{{ m.height }}</td>
+              <td>{{ m.weight }}</td>
+            </tr>
+            {% empty %}
+            <tr>
+              <td colspan="4" class="text-center text-muted py-3">No measurements yet.</td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

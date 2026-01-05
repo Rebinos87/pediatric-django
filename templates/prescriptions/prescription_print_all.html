@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Prescription - {{ patient.patient_name }}</title>
+  <style>
+    @page { size: A4; margin: 2cm; }
+    body {
+      font-family: Arial, sans-serif;
+      position: relative;
+    }
+    .watermark {
+      position: fixed;
+      top: 30%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      opacity: 0.3;
+      z-index: -1;
+    }
+    .watermark img { width: 120%; }
+  </style>
+</head>
+<body>
+  <div class="watermark">
+    <img src="/media/Logo.png" alt="Clinic Logo">
+  </div>
+
+  <h3>Dr Muhammed Birzo Khoshnaw</h3>
+  <p>Pediatric Clinic – Prescription</p>
+
+  <p>
+    <strong>Patient:</strong> {{ patient.patient_name }}<br>
+    <strong>Date:</strong> {{ prescriptions.first.created_at|date:"Y-m-d" }}
+  </p>
+
+  {% for rx in prescriptions %}
+    <p>
+      <strong>Medication:</strong> {{ rx.medicine_name }}<br>
+      <strong>Dosage:</strong> {{ rx.dosage }}<br>
+      <strong>Frequency:</strong> {{ rx.frequency }}<br>
+      <strong>Duration:</strong> {{ rx.duration_value }} {{ rx.duration_unit }}<br>
+      <strong>Instructions:</strong> {{ rx.instructions }}
+    </p>
+    {% if not forloop.last %}<hr>{% endif %}
+  {% endfor %}
+
+  <br><br>
+  ________________________________<br>
+  Signature
+</body>
+</html>

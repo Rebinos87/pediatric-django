@@ -1,0 +1,142 @@
+{% extends 'base.html' %}
+
+{% block title %}Prescriptions - {{ patient.patient_name }}{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-3">
+  <h4 class="mb-0">💊 Prescriptions - {{ patient.patient_name }}</h4>
+
+  <div class="d-flex">
+    <a href="{% url 'prescription_add' patient.pk %}"
+       class="btn btn-success me-2">
+      + Add Prescription
+    </a>
+    <a href="{% url 'prescription_print_all' patient.id %}"
+       target="_blank"
+       class="btn btn-info">
+      Print
+    </a>
+  </div>
+</div>
+
+
+
+
+{% if messages %}
+  {% for message in messages %}
+    <div class="alert alert-success alert-dismissible fade show" role="alert">
+      {{ message }}
+      <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+  {% endfor %}
+{% endif %}
+
+<!-- Active Prescriptions -->
+<h5 class="mt-4 mb-3">🟢 Active Prescriptions</h5>
+{% if active_prescriptions %}
+  <div class="table-responsive">
+    <table class="table table-hover">
+      <thead class="table-light">
+        <tr>
+          <th>Medicine</th>
+          <th>Dosage</th>
+          <th>Frequency</th>
+          <th>Duration</th>
+          <th>Prescribed By</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for rx in active_prescriptions %}
+          <tr>
+            <td>
+              <strong>{{ rx.medicine_name }}</strong>
+              {% if rx.indication %}
+                <br><small class="text-muted">For: {{ rx.indication|truncatewords:5 }}</small>
+              {% endif %}
+            </td>
+            <td>{{ rx.dosage }}</td>
+            <td>{{ rx.frequency }}</td>
+            <td>{{ rx.duration_string }}</td>
+            <td>{{ rx.prescribed_by|default:"-" }}</td>
+            <td>
+              <a href="{% url 'prescription_edit' rx.pk %}" class="btn btn-sm btn-warning">Edit</a>
+              <button type="button" class="btn btn-sm btn-danger" data-bs-toggle="modal" data-bs-target="#deleteRx{{ rx.pk }}">Delete</button>
+            </td>
+          </tr>
+          <tr class="table-light">
+            <td colspan="6">
+              {% if rx.instructions %}
+                <strong>Instructions:</strong> {{ rx.instructions }}<br>
+              {% endif %}
+              {% if rx.side_effects %}
+                <strong>⚠️ Side Effects:</strong> {{ rx.side_effects }}
+              {% endif %}
+            </td>
+          </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+{% else %}
+  <div class="alert alert-info">No active prescriptions</div>
+{% endif %}
+
+<!-- Inactive Prescriptions -->
+{% if inactive_prescriptions %}
+  <h5 class="mt-4 mb-3">⚪ Completed/Discontinued</h5>
+  <div class="table-responsive">
+    <table class="table table-hover table-sm">
+      <thead class="table-light">
+        <tr>
+          <th>Medicine</th>
+          <th>Dosage</th>
+          <th>Status</th>
+          <th>End Date</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for rx in inactive_prescriptions %}
+          <tr>
+            <td>{{ rx.medicine_name }}</td>
+            <td>{{ rx.dosage }}</td>
+            <td><span class="badge bg-secondary">{{ rx.status }}</span></td>
+            <td>{{ rx.end_date|date:"M d, Y"|default:"-" }}</td>
+            <td>
+              <button type="button" class="btn btn-sm btn-outline-danger" data-bs-toggle="modal" data-bs-target="#deleteRx{{ rx.pk }}">Delete</button>
+            </td>
+          </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+{% endif %}
+
+<!-- Delete Modals -->
+{% for rx in active_prescriptions|add:inactive_prescriptions %}
+  <div class="modal fade" id="deleteRx{{ rx.pk }}" tabindex="-1">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title">Delete Prescription?</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+        </div>
+        <div class="modal-body">
+          Delete <strong>{{ rx.medicine_name }}</strong>? This action cannot be undone.
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+          <form method="post" action="{% url 'prescription_delete' rx.pk %}" style="display: inline;">
+            {% csrf_token %}
+            <button type="submit" class="btn btn-danger">Delete</button>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+{% endfor %}
+
+<hr class="my-4">
+<a href="{% url 'patient_detail' patient.pk %}" class="btn btn-outline-secondary">← Back to Patient</a>
+{% endblock %}

@@ -1,0 +1,32 @@
+{% extends 'base.html' %}
+
+{% block title %}Delete Patient{% endblock %}
+
+{% block content %}
+<div class="alert alert-danger mb-3">
+  <strong>Warning:</strong> This action cannot be undone.
+</div>
+
+<div class="card border-danger">
+  <div class="card-body">
+    <h5 class="card-title">Delete Patient: {{ patient.patient_name }}?</h5>
+    <p class="card-text">Are you sure you want to permanently delete this patient record?</p>
+    
+    <div class="card mt-3 mb-3 bg-light">
+      <div class="card-body">
+        <p class="mb-1"><strong>Name:</strong> {{ patient.patient_name }}</p>
+        <p class="mb-1"><strong>DOB:</strong> {{ patient.date_of_birth|date:"Y-m-d" }}</p>
+        <p class="mb-1"><strong>Measurements:</strong> {{ patient.measurements.count }}</p>
+      </div>
+    </div>
+
+    <div class="d-flex gap-2">
+      <a href="{% url 'patient_detail' patient.pk %}" class="btn btn-secondary">Cancel</a>
+      <form method="post" style="display: inline;">
+        {% csrf_token %}
+        <button type="submit" class="btn btn-danger">Delete Permanently</button>
+      </form>
+    </div>
+  </div>
+</div>
+{% endblock %}

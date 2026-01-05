@@ -1,0 +1,249 @@
+{% extends 'base.html' %}
+
+{% block title %}Growth Charts - {{ patient.patient_name }}{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-3">
+  <h4 class="mb-0">Growth Charts - {{ patient.patient_name }}</h4>
+  <div>
+    <span class="badge bg-info">{{ patient.gender }}</span>
+    <span class="badge bg-secondary">{{ patient.get_applicable_standard }}</span>
+  </div>
+</div>
+
+<!-- Tab Navigation -->
+<ul class="nav nav-tabs mb-3" role="tablist">
+  <li class="nav-item" role="presentation">
+    <button class="nav-link active" id="height-tab" data-bs-toggle="tab" data-bs-target="#height-pane" type="button">
+      Height-for-Age
+    </button>
+  </li>
+  <li class="nav-item" role="presentation">
+    <button class="nav-link" id="weight-tab" data-bs-toggle="tab" data-bs-target="#weight-pane" type="button">
+      Weight-for-Age
+    </button>
+  </li>
+  <li class="nav-item" role="presentation">
+    <button class="nav-link" id="bmi-tab" data-bs-toggle="tab" data-bs-target="#bmi-pane" type="button">
+      BMI-for-Age
+    </button>
+  </li>
+  <li class="nav-item" role="presentation">
+    <button class="nav-link" id="reference-tab" data-bs-toggle="tab" data-bs-target="#reference-pane" type="button">
+      Reference Charts
+    </button>
+  </li>
+</ul>
+
+<!-- Tab Content -->
+<div class="tab-content">
+  <!-- Height Chart -->
+  <div class="tab-pane fade show active" id="height-pane" role="tabpanel">
+    <div class="card">
+      <div class="card-header">
+        <h6 class="mb-0">Height-for-Age Growth Chart</h6>
+      </div>
+      <div class="card-body">
+        <canvas id="heightChart" style="max-height: 400px;"></canvas>
+        <div class="mt-3 small text-muted">
+          <p class="mb-1"><strong>Interpretation:</strong></p>
+          <ul class="mb-0">
+            <li>Green line = Your child's measurements</li>
+            <li>Red line = 50th percentile (median)</li>
+            <li>Gray dashed lines = 5th & 95th percentiles</li>
+            <li>Between 5th-95th = Normal growth range</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Weight Chart -->
+  <div class="tab-pane fade" id="weight-pane" role="tabpanel">
+    <div class="card">
+      <div class="card-header">
+        <h6 class="mb-0">Weight-for-Age Growth Chart</h6>
+      </div>
+      <div class="card-body">
+        <canvas id="weightChart" style="max-height: 400px;"></canvas>
+        <div class="mt-3 small text-muted">
+          <p class="mb-1"><strong>Interpretation:</strong></p>
+          <ul class="mb-0">
+            <li>Green line = Your child's measurements</li>
+            <li>Red line = 50th percentile (median)</li>
+            <li>Gray dashed lines = 5th & 95th percentiles</li>
+            <li>Below 5th percentile = Underweight (consult physician)</li>
+            <li>Above 95th percentile = Overweight (monitor)</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- BMI Chart -->
+  <div class="tab-pane fade" id="bmi-pane" role="tabpanel">
+    <div class="card">
+      <div class="card-header">
+        <h6 class="mb-0">BMI-for-Age Growth Chart</h6>
+      </div>
+      <div class="card-body">
+        <canvas id="bmiChart" style="max-height: 400px;"></canvas>
+        <div class="mt-3 small text-muted">
+          <p class="mb-1"><strong>BMI Categories (CDC):</strong></p>
+          <ul class="mb-0">
+            <li><5th percentile = Underweight</li>
+            <li>5th - <85th percentile = Healthy weight</li>
+            <li>85th - <95th percentile = Overweight</li>
+            <li>≥95th percentile = Obese</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Reference Charts -->
+  <div class="tab-pane fade" id="reference-pane" role="tabpanel">
+    <div class="card">
+      <div class="card-header">
+        <h6 class="mb-0">CDC Reference Charts (2-20 years)</h6>
+      </div>
+      <div class="card-body">
+        <p class="text-muted mb-3">Download official CDC growth charts for reference:</p>
+        <div class="row g-2">
+          <div class="col-md-6">
+            <a href="https://www.cdc.gov/growthcharts/data/set1clinical/cj41c021.pdf" class="btn btn-outline-primary btn-sm w-100" target="_blank">
+              📊 CDC Boys Chart (2-20 years)
+            </a>
+          </div>
+          <div class="col-md-6">
+            <a href="https://www.cdc.gov/growthcharts/data/set1clinical/cj41c022.pdf" class="btn btn-outline-primary btn-sm w-100" target="_blank">
+              📊 CDC Girls Chart (2-20 years)
+            </a>
+          </div>
+        </div>
+        <hr>
+        <p class="text-muted mb-3">WHO Growth Standards for younger children:</p>
+        <div class="row g-2">
+          <div class="col-md-6">
+            <a href="https://www.who.int/tools/child-growth-standards/standards/weight-for-age" class="btn btn-outline-success btn-sm w-100" target="_blank">
+              📊 WHO Weight Standards
+            </a>
+          </div>
+          <div class="col-md-6">
+            <a href="https://www.who.int/tools/child-growth-standards/standards/length-height-for-age" class="btn btn-outline-success btn-sm w-100" target="_blank">
+              📊 WHO Height Standards
+            </a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+  // Reusable chart loader
+  async function loadChart(canvasId, apiUrl) {
+    try {
+      const response = await fetch(apiUrl);
+      const payload = await response.json();
+
+      if (payload.error) {
+        console.error(payload.error);
+        return;
+      }
+
+      const ctx = document.getElementById(canvasId).getContext('2d');
+
+      new Chart(ctx, {
+        type: 'line',
+        data: payload.chartData,
+        options: {
+          responsive: true,
+          maintainAspectRatio: true,
+          scales: {
+            x: {
+              type: 'linear',
+              title: {
+                display: true,
+                text: payload.xLabel,
+                font: { weight: 'bold' }
+              },
+              min: 0,
+              max: 240
+            },
+            y: {
+              title: {
+                display: true,
+                text: payload.yLabel,
+                font: { weight: 'bold' }
+              }
+            }
+          },
+          plugins: {
+            legend: {
+              position: 'bottom',
+              labels: {
+                usePointStyle: true,
+                padding: 15
+              }
+            },
+            title: {
+              display: true,
+              text: payload.title,
+              font: { size: 14, weight: 'bold' }
+            },
+            tooltip: {
+              mode: 'nearest',
+              intersect: false,
+              callbacks: {
+                label: function(context) {
+                  let label = context.dataset.label || '';
+                  if (label) label += ': ';
+                  label += context.parsed.y.toFixed(1);
+                  return label;
+                }
+              }
+            }
+          },
+          interaction: {
+            mode: 'index',
+            intersect: false
+          }
+        }
+      });
+    } catch (error) {
+      console.error('Chart loading error:', error);
+      document.getElementById(canvasId).parentElement.innerHTML = 
+        '<div class="alert alert-warning">Unable to load chart data</div>';
+    }
+  }
+
+  // Initialize charts when tab is shown
+  document.addEventListener('DOMContentLoaded', function() {
+    const heightTab = document.getElementById('height-tab');
+    const weightTab = document.getElementById('weight-tab');
+    const bmiTab = document.getElementById('bmi-tab');
+
+    // Load height chart immediately
+    loadChart('heightChart', "{% url 'api_growth_chart' patient.id 'height' %}");
+
+    // Load weight chart when tab shown
+    weightTab.addEventListener('shown.bs.tab', function() {
+      if (!window.weightChartLoaded) {
+        loadChart('weightChart', "{% url 'api_growth_chart' patient.id 'weight' %}");
+        window.weightChartLoaded = true;
+      }
+    });
+
+    // Load BMI chart when tab shown
+    bmiTab.addEventListener('shown.bs.tab', function() {
+      if (!window.bmiChartLoaded) {
+        loadChart('bmiChart', "{% url 'api_bmi_chart' patient.id %}");
+        window.bmiChartLoaded = true;
+      }
+    });
+  });
+</script>
+{% endblock %}
