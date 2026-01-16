@@ -745,7 +745,7 @@ from django.http import JsonResponse
 from django.utils.dateparse import parse_date
 from .models import Patient
 
-AGE_BINS = [(0, 1), (2, 5), (6, 10), (11, 15), (16, 20), (21, 40)]
+AGE_BINS = [(0, 1), (2, 5), (6, 10), (11, 15)]
 
 def age_in_years(dob):
     if not dob:
