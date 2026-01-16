@@ -38,12 +38,15 @@
     <div class="card">
       <div class="card-header d-flex justify-content-between align-items-center">
         <span class="fw-semibold">Patients by Age & Gender</span>
-        <form id="patient-filter-form" class="d-flex flex-wrap gap-2 justify-content-end">
-          <input type="month" id="filter-month" class="form-control form-control-sm" />
-          <input type="date" id="filter-start" class="form-control form-control-sm" />
-          <input type="date" id="filter-end" class="form-control form-control-sm" />
-          <button class="btn btn-sm btn-primary" type="button" id="filter-apply">Filter</button>
-        </form>
+        <form id="patient-filter-form">
+  <select class="filter-field">...</select>
+  <input type="date" class="filter-field">
+  <input type="date" class="filter-field">
+  <button type="button" id="filter-apply" class="btn btn-primary filter-button">
+    Filter
+  </button>
+</form>
+
       </div>
       <div class="card-body">
         <canvas id="patientsAgeGenderChart" height="120"></canvas>
