@@ -38,4 +38,18 @@
     flex-wrap: wrap;
     border-radius: 16px;
   }
+  @media (max-width: 576px) {
+  #patient-filter-form {
+    width: 100%;
+    justify-content: flex-start;
+  }
+  #patient-filter-form > * {
+    flex: 1 1 48%;
+    min-width: 0;
+  }
+  #filter-apply {
+    flex: 0 0 auto;
+  }
+}
+
 }
