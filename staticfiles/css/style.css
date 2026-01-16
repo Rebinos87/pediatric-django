@@ -32,32 +32,28 @@
 .patient-actions .success  { background: #22c55e; color: #f9fafb; }
 .patient-actions .danger   { background: #ef4444; color: #ffffff; }
 
-/* Desktop: keep original inline layout */
-.filter-form {
+/* default: desktop exactly like before */
+#patient-filter-form {
   display: flex;
-  flex-wrap: nowrap;
   gap: 0.5rem;
   justify-content: flex-end;
-}
-.filter-form .filter-field {
-  width: auto;
-  flex: 0 0 auto;
-}
-.filter-form .filter-button {
-  flex: 0 0 auto;
+  flex-wrap: nowrap;
 }
 
-/* Mobile only */
+/* only on narrow screens stack nicely */
 @media (max-width: 576px) {
-  .filter-form {
+  #patient-filter-form {
     flex-wrap: wrap;
     justify-content: flex-start;
   }
-  .filter-form .filter-field {
+
+  #patient-filter-form .filter-field {
     flex: 1 1 100%;
   }
-  .filter-form .filter-button {
-    margin-top: 0.25rem;
+
+  #patient-filter-form .filter-button {
+    flex: 0 0 auto;
+    align-self: center;
   }
 }
 
