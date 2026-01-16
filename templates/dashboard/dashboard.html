@@ -3,6 +3,7 @@
 {% block title %}Dashboard | Pediatric Growth System{% endblock %}
 
 {% block content %}
+
 <div class="row g-3 mb-3">
   <div class="col-md-4">
     <div class="card">
@@ -26,6 +27,27 @@
         <div class="text-muted small text-uppercase">Measurements</div>
         <div class="fs-3 fw-bold">{{ total_measurements }}</div>
         <div class="small text-muted">Recorded entries</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Patients by Age & Gender + Filters -->
+<div class="row g-3 mb-3">
+  <div class="col-lg-12">
+    <div class="card">
+      <div class="card-header d-flex justify-content-between align-items-center">
+        <span class="fw-semibold">Patients by Age & Gender</span>
+        <form id="patient-filter-form" class="d-flex gap-2">
+          <input type="month" id="filter-month" class="form-control form-control-sm" />
+          <input type="date" id="filter-start" class="form-control form-control-sm" />
+          <input type="date" id="filter-end" class="form-control form-control-sm" />
+          <button class="btn btn-sm btn-primary" type="button" id="filter-apply">Filter</button>
+        </form>
+      </div>
+      <div class="card-body">
+        <canvas id="patientsAgeGenderChart" height="120"></canvas>
+        <div class="mt-2 small text-muted" id="patients-chart-summary"></div>
       </div>
     </div>
   </div>
@@ -98,4 +120,99 @@
     </div>
   </div>
 </div>
+
+<!-- Chart.js and dashboard script -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<script>
+  const ctx = document.getElementById('patientsAgeGenderChart').getContext('2d');
+  let patientsChart = null;
+
+  async function loadPatientStats(params = {}) {
+    const query = new URLSearchParams(params).toString();
+    const url = "{% url 'patient_stats' %}" + (query ? "?" + query : "");
+
+
+    const response = await fetch(url);
+    const data = await response.json();  // {labels, male, female, total}
+
+    const datasets = [
+      {
+        label: 'Male',
+        data: data.male,
+        backgroundColor: 'rgba(54, 162, 235, 0.7)',
+        stack: 'gender',
+      },
+      {
+        label: 'Female',
+        data: data.female,
+        backgroundColor: 'rgba(255, 99, 132, 0.7)',
+        stack: 'gender',
+      },
+    ];
+
+    if (patientsChart) {
+      patientsChart.data.labels = data.labels;
+      patientsChart.data.datasets = datasets;
+      patientsChart.update();
+    } else {
+      patientsChart = new Chart(ctx, {
+        type: 'bar',
+        data: { labels: data.labels, datasets: datasets },
+        options: {
+          responsive: true,
+          plugins: {
+            tooltip: {
+              callbacks: {
+                footer(items) {
+                  const sum = items.reduce((s, i) => s + i.parsed.y, 0);
+                  return 'Total: ' + sum;
+                }
+              }
+            },
+            legend: { position: 'bottom' }
+          },
+          onClick(evt, elements) {
+            if (!elements.length) return;
+            const index = elements[0].index;
+            const label = patientsChart.data.labels[index];
+            const male = data.male[index];
+            const female = data.female[index];
+            const total = male + female;
+            document.getElementById('patients-chart-summary').textContent =
+              `Age group ${label}: ${total} patients (${male} male, ${female} female).`;
+          },
+          scales: {
+            x: {
+              stacked: true,
+              title: { display: true, text: 'Age group (years)' }
+            },
+            y: {
+              stacked: true,
+              beginAtZero: true,
+              title: { display: true, text: 'Number of patients' }
+            }
+          }
+        }
+      });
+    }
+
+    // Overall summary text
+    document.getElementById('patients-chart-summary').textContent =
+      `Total patients in filter: ${data.total}`;
+  }
+
+  // Initial load
+  loadPatientStats();
+
+  // Filter button
+  document.getElementById('filter-apply').addEventListener('click', () => {
+    loadPatientStats({
+      month: document.getElementById('filter-month').value,
+      start: document.getElementById('filter-start').value,
+      end: document.getElementById('filter-end').value,
+    });
+  });
+</script>
+
 {% endblock %}

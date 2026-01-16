@@ -2,49 +2,116 @@
 <html>
 <head>
   <title>Prescription - {{ patient.patient_name }}</title>
-  <style>
-    @page { size: A4; margin: 2cm; }
-    body {
-      font-family: Arial, sans-serif;
-      position: relative;
-    }
-    .watermark {
-      position: fixed;
-      top: 30%;
-      left: 50%;
-      transform: translate(-50%, -50%);
-      opacity: 0.3;
-      z-index: -1;
-    }
-    .watermark img { width: 120%; }
-  </style>
+ <style>
+  @page { size: A4; margin: 10mm; }
+  body {
+    font-family: Arial, sans-serif;
+    background: #e0f1f7;
+    margin: 0;
+  padding: 0;
+  }
+  .prescription-page {
+    width: 21cm;
+    margin: 0 auto;
+    padding: 2cm 2cm 1.5cm;
+    background: #ffffff;
+    box-sizing: border-box;
+    position: relative;
+  }
+  .rx-header {
+    border-bottom: 3px solid #0a6f8f;
+    padding-bottom: 0.7rem;
+    margin-bottom: 1rem;
+  }
+  .clinic-logo-title {
+    display: flex;
+    align-items: center;
+    gap: 0.8rem;
+  }
+  .clinic-logo {
+  height: 90px;   /* was 40px */
+  width: auto;
+}
+  .clinic-logo-title h2 {
+    margin: 0;
+    color: #0a6f8f;
+  }
+  .clinic-logo-title p {
+    margin: 0;
+    font-size: 0.8rem;
+    color: #555;
+  }
+  .patient-box {
+    border: 1px solid #d0d0d0;
+    padding: 0.6rem 0.8rem;
+    margin-bottom: 1rem;
+    font-size: 0.9rem;
+    background: #f7fbfd;
+  }
+  .rx-body { position: relative; min-height: 18cm; }
+  .rx-watermark {
+    position: absolute;
+    font-size: 10cm;
+    color: rgba(10, 111, 143, 0.05);
+    font-weight: 700;
+    top: 32%;
+    left: 20%;
+    z-index: 0;
+  }
+  .rx-info { position: relative; z-index: 1; }
+  .rx-footer {
+    border-top: 1px solid #ccc;
+    margin-top: 1rem;
+    padding-top: 0.5rem;
+    text-align: center;
+    font-size: 0.8rem;
+  }
+</style>
+
+
 </head>
 <body>
-  <div class="watermark">
-    <img src="/media/Logo.png" alt="Clinic Logo">
+  <div class="prescription-page">
+    <header class="rx-header">
+  <div class="clinic-logo-title">
+    <img src="/media/Logo.png" alt="Clinic Logo" class="clinic-logo">
+    <div>
+      <h2>Dr Muhammed Birzo Khoshnaw</h2>
+      <p>Pediatric Clinic</p>
+    </div>
   </div>
+</header>
+    <main class="rx-body">
+      <div class="rx-info">
+        <div class="patient-box">
+  <div>Patient’s Name: {{ patient.patient_name }}</div>
+  <div>Date: {{ prescriptions.first.created_at|date:"Y-m-d" }}</div>
+  <div>Diagnosis: {{ patient.diagnosis }}</div>
+</div>
 
-  <h3>Dr Muhammed Birzo Khoshnaw</h3>
-  <p>Pediatric Clinic – Prescription</p>
+<h3>Rx:</h3>
+        
 
-  <p>
-    <strong>Patient:</strong> {{ patient.patient_name }}<br>
-    <strong>Date:</strong> {{ prescriptions.first.created_at|date:"Y-m-d" }}
-  </p>
+        {% for rx in prescriptions %}
+          <p>
+            <strong>Medication:</strong> {{ rx.medicine_name }}<br>
+            <strong>Dosage:</strong> {{ rx.dosage }}<br>
+            <strong>Frequency:</strong> {{ rx.frequency }}<br>
+            <strong>Duration:</strong> {{ rx.duration_value }} {{ rx.duration_unit }}<br>
+            <strong>Instructions:</strong> {{ rx.instructions }}
+          </p>
+          {% if not forloop.last %}<hr>{% endif %}
+        {% endfor %}
+      </div>
 
-  {% for rx in prescriptions %}
-    <p>
-      <strong>Medication:</strong> {{ rx.medicine_name }}<br>
-      <strong>Dosage:</strong> {{ rx.dosage }}<br>
-      <strong>Frequency:</strong> {{ rx.frequency }}<br>
-      <strong>Duration:</strong> {{ rx.duration_value }} {{ rx.duration_unit }}<br>
-      <strong>Instructions:</strong> {{ rx.instructions }}
-    </p>
-    {% if not forloop.last %}<hr>{% endif %}
-  {% endfor %}
+      <div class="rx-watermark">Rx</div>
+    </main>
 
-  <br><br>
-  ________________________________<br>
-  Signature
+    <footer class="rx-footer">
+      <!-- Signature, contact, etc. -->
+      <div>____________________ Signature</div>
+    </footer>
+  </div>
 </body>
+
 </html>

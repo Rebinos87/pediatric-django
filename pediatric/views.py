@@ -739,3 +739,66 @@ def prescription_print_all(request, patient_id):
         'prescriptions': prescriptions,
     })
 
+from datetime import date
+from django.contrib.auth.decorators import login_required
+from django.http import JsonResponse
+from django.utils.dateparse import parse_date
+from .models import Patient
+
+AGE_BINS = [(0, 1), (2, 5), (6, 10), (11, 15), (16, 20), (21, 40)]
+
+def age_in_years(dob):
+    if not dob:
+        return None
+    today = date.today()
+    return today.year - dob.year - (
+        (today.month, today.day) < (dob.month, dob.day)
+    )
+
+@login_required
+def patient_stats(request):
+    qs = Patient.objects.all()
+
+    month = request.GET.get("month")
+    start = request.GET.get("start")
+    end = request.GET.get("end")
+
+    if month:
+        year, m = month.split("-")
+        qs = qs.filter(date_registered__year=year,
+                       date_registered__month=m)
+    if start:
+        qs = qs.filter(date_registered__gte=parse_date(start))
+    if end:
+        qs = qs.filter(date_registered__lte=parse_date(end))
+
+    # Build (age, gender) list
+    records = []
+    for p in qs:
+        age = age_in_years(p.date_of_birth)
+        if age is None:
+            continue
+        records.append((age, p.gender))
+
+    labels, male, female = [], [], []
+
+    for low, high in AGE_BINS:
+        labels.append(f"{low}-{high}")
+        m_count = sum(
+            1 for age, g in records
+            if low <= age <= high and g in ["M", "Male", "male"]
+        )
+        f_count = sum(
+            1 for age, g in records
+            if low <= age <= high and g in ["F", "Female", "female"]
+        )
+        male.append(m_count)
+        female.append(f_count)
+
+    return JsonResponse({
+        "labels": labels,
+        "male": male,
+        "female": female,
+        "total": len(records),
+    })
+

@@ -1,5 +1,6 @@
 from django.urls import path
 from . import views
+from .views import patient_stats
 
 urlpatterns = [
     # Authentication
@@ -67,5 +68,7 @@ urlpatterns = [
     path('patients/<int:patient_id>/prescriptions/print/',
      views.prescription_print_all,
      name='prescription_print_all'),
+
+     path("patients/stats/", patient_stats, name="patient_stats"),
 
 ]
