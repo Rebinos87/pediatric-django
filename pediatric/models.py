@@ -218,8 +218,13 @@ class PatientDocument(models.Model):
     
     @property
     def file_extension(self):
-        """Get file extension"""
-        return self.file.name.split('.')[-1].lower()
+        """Get file extension safely"""
+        try:
+            if self.file and self.file.name:
+                return self.file.name.split('.')[-1].lower()
+        except Exception:
+            pass
+        return ''
     
     @property
     def is_pdf(self):
