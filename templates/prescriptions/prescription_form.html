@@ -1,0 +1,97 @@
+{% extends 'base.html' %}
+
+{% block title %}{% if is_edit %}Edit{% else %}Add{% endif %} Prescription{% endblock %}
+
+{% block content %}
+<h4 class="mb-3">{% if is_edit %}Edit{% else %}Add New{% endif %} Prescription - {{ patient.patient_name }}</h4>
+
+<div class="card" style="max-width: 700px;">
+  <div class="card-body">
+    <form method="post">
+      {% csrf_token %}
+      
+      <div class="row g-3">
+        <div class="col-md-6">
+          <label class="form-label">Medicine Name *</label>
+          <input type="text" name="medicine_name" class="form-control" value="{{ prescription.medicine_name|default:'' }}" required>
+        </div>
+        
+        <div class="col-md-3">
+          <label class="form-label">Dosage *</label>
+          <input type="text" name="dosage" class="form-control" placeholder="e.g., 500mg, 10ml" value="{{ prescription.dosage|default:'' }}" required>
+        </div>
+        
+        <div class="col-md-3">
+          <label class="form-label">Frequency *</label>
+          <select name="frequency" class="form-select" required>
+            <option value="">Select...</option>
+            {% for value, label in frequencies %}
+              <option value="{{ value }}" {% if prescription.frequency == value %}selected{% endif %}>{{ label }}</option>
+            {% endfor %}
+          </select>
+        </div>
+        
+        <div class="col-md-6">
+          <label class="form-label">Duration *</label>
+          <div class="input-group">
+            <input type="number" name="duration_value" class="form-control" min="1" value="{{ prescription.duration_value|default:'' }}" required>
+            <select name="duration_unit" class="form-select" style="max-width: 120px;">
+              {% for value, label in units %}
+                <option value="{{ value }}" {% if prescription.duration_unit == value %}selected{% endif %}>{{ label }}</option>
+              {% endfor %}
+            </select>
+          </div>
+        </div>
+        
+        <div class="col-md-6">
+          <label class="form-label">Prescribed By</label>
+          <input type="text" name="prescribed_by" class="form-control" placeholder="Doctor's name" value="{{ prescription.prescribed_by|default:'' }}">
+        </div>
+        
+        <div class="col-12">
+          <label class="form-label">Indication (Why prescribed)</label>
+          <textarea name="indication" rows="2" class="form-control">{{ prescription.indication|default:'' }}</textarea>
+        </div>
+        
+        <div class="col-12">
+          <label class="form-label">Special Instructions</label>
+          <textarea name="instructions" rows="2" class="form-control" placeholder="e.g., Take with food, Avoid dairy...">{{ prescription.instructions|default:'' }}</textarea>
+        </div>
+        
+        <div class="col-12">
+          <label class="form-label">⚠️ Known Side Effects</label>
+          <textarea name="side_effects" rows="2" class="form-control" placeholder="e.g., Nausea, Dizziness...">{{ prescription.side_effects|default:'' }}</textarea>
+        </div>
+        
+        {% if is_edit %}
+          <div class="col-md-6">
+            <label class="form-label">Status</label>
+            <select name="status" class="form-select">
+              {% for value, label in statuses %}
+                <option value="{{ value }}" {% if prescription.status == value %}selected{% endif %}>{{ label }}</option>
+              {% endfor %}
+            </select>
+          </div>
+          
+          <div class="col-md-6">
+            <label class="form-label">End Date</label>
+            <input type="date" name="end_date" class="form-control" value="{{ prescription.end_date|date:'Y-m-d'|default:'' }}">
+          </div>
+        {% endif %}
+        
+        <div class="col-12">
+          <label class="form-label">Additional Notes</label>
+          <textarea name="notes" rows="2" class="form-control">{{ prescription.notes|default:'' }}</textarea>
+        </div>
+      </div>
+      
+      <div class="mt-4 d-flex gap-2">
+        <button type="submit" class="btn btn-primary">
+          {% if is_edit %}Update Prescription{% else %}Add Prescription{% endif %}
+        </button>
+        <a href="{% url 'patient_prescriptions' patient.pk %}" class="btn btn-outline-secondary">Cancel</a>
+      </div>
+    </form>
+  </div>
+</div>
+{% endblock %}

@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Prescription</title>
+  <style>
+    @page { size: A4; margin: 2cm; }
+    body {
+      font-family: Arial, sans-serif;
+      position: relative;
+    }
+    .watermark {
+      position: fixed;
+      top: 30%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      opacity: 0.08;
+      z-index: -1;
+    }
+    .watermark img {
+      width: 60%;
+    }
+    .header {
+      text-align: center;
+      margin-bottom: 20px;
+    }
+    .doctor-name {
+      font-weight: bold;
+      font-size: 18px;
+    }
+    .patient-info, .meds {
+      margin-bottom: 15px;
+      font-size: 14px;
+    }
+    .meds ul {
+      padding-left: 18px;
+    }
+  </style>
+</head>
+<body>
+  <!-- watermark -->
+  <div class="watermark">
+    <img src="/media/Logo.png" alt="Clinic Logo">
+  </div>
+
+  <div class="header">
+    <div class="doctor-name">Dr Muhammed Birzo Khoshnaw</div>
+    <div>Pediatric Clinic – Prescription</div>
+  </div>
+
+  <div class="patient-info">
+    <strong>Patient:</strong> {{ patient.patient_name }}<br>
+    <strong>Date:</strong> {{ prescription.created_at|date:"Y-m-d" }}
+  </div>
+
+  <div class="meds">
+    <strong>Medication:</strong> {{ prescription.medicine_name }}<br>
+    <strong>Dosage:</strong> {{ prescription.dosage }}<br>
+    <strong>Frequency:</strong> {{ prescription.frequency }}<br>
+    <strong>Duration:</strong> {{ prescription.duration_value }} {{ prescription.duration_unit }}<br>
+    <strong>Instructions:</strong> {{ prescription.instructions }}
+  </div>
+
+  <div style="margin-top:60px;">
+    ________________________________<br>
+    Signature
+  </div>
+</body>
+</html>
