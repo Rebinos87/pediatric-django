@@ -50,6 +50,8 @@ urlpatterns = [
          views.document_upload, name='document_upload'),
     path('documents/<int:doc_id>/delete/',
          views.document_delete, name='document_delete'),
+    path('documents/<int:doc_id>/view/',
+         views.document_view, name='document_view'),
     path('documents/<int:doc_id>/download/',
          views.document_download, name='document_download'),
 

@@ -603,6 +603,30 @@ from django.http import FileResponse, Http404
 import os
 
 @login_required
+def document_view(request, doc_id):
+    """View document inline in browser"""
+    document = get_object_or_404(PatientDocument, pk=doc_id)
+    file_field = document.file
+
+    if not file_field or not file_field.name or not file_field.storage.exists(file_field.name):
+        raise Http404("File not found")
+
+    ext = document.file_extension
+    content_types = {
+        'pdf': 'application/pdf',
+        'jpg': 'image/jpeg',
+        'jpeg': 'image/jpeg',
+        'png': 'image/png',
+        'gif': 'image/gif',
+    }
+    content_type = content_types.get(ext, 'application/octet-stream')
+    
+    response = FileResponse(file_field.open('rb'), content_type=content_type)
+    response['Content-Disposition'] = f'inline; filename="{os.path.basename(file_field.name)}"'
+    return response
+
+
+@login_required
 def document_download(request, doc_id):
     document = get_object_or_404(PatientDocument, pk=doc_id)
     file_field = document.file

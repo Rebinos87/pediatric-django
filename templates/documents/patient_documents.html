@@ -41,6 +41,11 @@
             </small>
             
             <div class="btn-group btn-group-sm w-100" role="group">
+              {% if doc.is_pdf or doc.is_image %}
+              <a href="{% url 'document_view' doc.pk %}" target="_blank" class="btn btn-outline-success">
+                👁️ View
+              </a>
+              {% endif %}
               <a href="{% url 'document_download' doc.pk %}" class="btn btn-outline-primary">
                 {% if doc.is_pdf %}📄{% elif doc.is_image %}🖼️{% else %}📎{% endif %} Download
               </a>
