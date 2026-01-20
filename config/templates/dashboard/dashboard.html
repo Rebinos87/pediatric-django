@@ -1,0 +1,223 @@
+{% extends 'base.html' %}
+
+{% block title %}Dashboard | Pediatric Growth System{% endblock %}
+
+{% block content %}
+
+<div class="row g-3 mb-3">
+  <div class="col-md-4">
+    <div class="card">
+      <div class="card-body">
+        <div class="d-flex justify-content-between align-items-center">
+          <div>
+            <div class="text-muted small text-uppercase">Total Patients</div>
+            <div class="fs-3 fw-bold">{{ total_patients }}</div>
+          </div>
+          <div class="btn btn-sm btn-outline-primary rounded-pill">
+            <a href="{% url 'patient_create' %}" class="text-decoration-none">+ New Patient</a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="col-md-4">
+    <div class="card">
+      <div class="card-body">
+        <div class="text-muted small text-uppercase">Measurements</div>
+        <div class="fs-3 fw-bold">{{ total_measurements }}</div>
+        <div class="small text-muted">Recorded entries</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Patients by Age & Gender + Filters -->
+<div class="row g-3 mb-3">
+  <div class="col-lg-12">
+    <div class="card">
+      <div class="card-header d-flex justify-content-between align-items-center flex-wrap">
+        <span class="fw-semibold mb-2 mb-md-0">Patients by Age & Gender</span>
+        <form id="patient-filter-form" class="d-flex gap-2 flex-wrap">
+          <input type="month" id="filter-month" class="form-control form-control-sm filter-input" placeholder="Month" />
+          <input type="date" id="filter-start" class="form-control form-control-sm filter-input" placeholder="Start Date" />
+          <input type="date" id="filter-end" class="form-control form-control-sm filter-input" placeholder="End Date" />
+          <button class="btn btn-sm btn-primary" type="button" id="filter-apply">Filter</button>
+        </form>
+         
+        
+        
+
+
+      </div>
+      <div class="card-body">
+        <canvas id="patientsAgeGenderChart" height="120"></canvas>
+        <div class="mt-2 small text-muted" id="patients-chart-summary"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="row g-3">
+  <div class="col-lg-6">
+    <div class="card h-100">
+      <div class="card-header d-flex justify-content-between align-items-center">
+        <span class="fw-semibold">Recent Patients</span>
+      </div>
+      <div class="card-body p-0">
+        <table class="table table-hover mb-0">
+          <thead class="table-light">
+            <tr>
+              <th>Name</th>
+              <th>Gender</th>
+              <th>Registered</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for p in recent_patients %}
+            <tr>
+              <td><a href="{% url 'patient_detail' p.pk %}">{{ p.patient_name }}</a></td>
+              <td>{{ p.gender }}</td>
+              <td>{{ p.date_registered|date:"Y-m-d" }}</td>
+            </tr>
+            {% empty %}
+            <tr>
+              <td colspan="3" class="text-center text-muted py-3">No patients yet.</td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <div class="col-lg-6">
+    <div class="card h-100">
+      <div class="card-header">
+        <span class="fw-semibold">Recent Measurements</span>
+      </div>
+      <div class="card-body p-0">
+        <table class="table table-hover mb-0">
+          <thead class="table-light">
+            <tr>
+              <th>Patient</th>
+              <th>Date</th>
+              <th>Height (cm)</th>
+              <th>Weight (kg)</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for m in recent_measurements %}
+            <tr>
+              <td><a href="{% url 'patient_detail' m.patient.pk %}">{{ m.patient.patient_name }}</a></td>
+              <td>{{ m.measurement_date|date:"Y-m-d" }}</td>
+              <td>{{ m.height }}</td>
+              <td>{{ m.weight }}</td>
+            </tr>
+            {% empty %}
+            <tr>
+              <td colspan="4" class="text-center text-muted py-3">No measurements yet.</td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Chart.js and dashboard script -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<script>
+  const ctx = document.getElementById('patientsAgeGenderChart').getContext('2d');
+  let patientsChart = null;
+
+  async function loadPatientStats(params = {}) {
+    const query = new URLSearchParams(params).toString();
+    const url = "{% url 'patient_stats' %}" + (query ? "?" + query : "");
+
+
+    const response = await fetch(url);
+    const data = await response.json();  // {labels, male, female, total}
+
+    const datasets = [
+      {
+        label: 'Male',
+        data: data.male,
+        backgroundColor: 'rgba(54, 162, 235, 0.7)',
+        stack: 'gender',
+      },
+      {
+        label: 'Female',
+        data: data.female,
+        backgroundColor: 'rgba(255, 99, 132, 0.7)',
+        stack: 'gender',
+      },
+    ];
+
+    if (patientsChart) {
+      patientsChart.data.labels = data.labels;
+      patientsChart.data.datasets = datasets;
+      patientsChart.update();
+    } else {
+      patientsChart = new Chart(ctx, {
+        type: 'bar',
+        data: { labels: data.labels, datasets: datasets },
+        options: {
+          responsive: true,
+          plugins: {
+            tooltip: {
+              callbacks: {
+                footer(items) {
+                  const sum = items.reduce((s, i) => s + i.parsed.y, 0);
+                  return 'Total: ' + sum;
+                }
+              }
+            },
+            legend: { position: 'bottom' }
+          },
+          onClick(evt, elements) {
+            if (!elements.length) return;
+            const index = elements[0].index;
+            const label = patientsChart.data.labels[index];
+            const male = data.male[index];
+            const female = data.female[index];
+            const total = male + female;
+            document.getElementById('patients-chart-summary').textContent =
+              `Age group ${label}: ${total} patients (${male} male, ${female} female).`;
+          },
+          scales: {
+            x: {
+              stacked: true,
+              title: { display: true, text: 'Age group (years)' }
+            },
+            y: {
+              stacked: true,
+              beginAtZero: true,
+              title: { display: true, text: 'Number of patients' }
+            }
+          }
+        }
+      });
+    }
+
+    // Overall summary text
+    document.getElementById('patients-chart-summary').textContent =
+      `Total patients in filter: ${data.total}`;
+  }
+
+  // Initial load
+  loadPatientStats();
+
+  // Filter button
+  document.getElementById('filter-apply').addEventListener('click', () => {
+    loadPatientStats({
+      month: document.getElementById('filter-month').value,
+      start: document.getElementById('filter-start').value,
+      end: document.getElementById('filter-end').value,
+    });
+  });
+</script>
+
+{% endblock %}

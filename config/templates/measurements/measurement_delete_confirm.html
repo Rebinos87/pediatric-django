@@ -1,0 +1,33 @@
+{% extends 'base.html' %}
+
+{% block title %}Delete Measurement{% endblock %}
+
+{% block content %}
+<div class="alert alert-danger mb-3">
+  <strong>Warning:</strong> This action cannot be undone.
+</div>
+
+<div class="card border-danger">
+  <div class="card-body">
+    <h5 class="card-title">Delete Measurement?</h5>
+    <p class="card-text">Are you sure you want to permanently delete this measurement record for {{ patient.patient_name }}?</p>
+    
+    <div class="card mt-3 mb-3 bg-light">
+      <div class="card-body">
+        <p class="mb-1"><strong>Patient:</strong> {{ patient.patient_name }}</p>
+        <p class="mb-1"><strong>Date:</strong> {{ measurement.measurement_date|date:"Y-m-d" }}</p>
+        <p class="mb-1"><strong>Height:</strong> {{ measurement.height }} cm</p>
+        <p class="mb-1"><strong>Weight:</strong> {{ measurement.weight }} kg</p>
+      </div>
+    </div>
+
+    <div class="d-flex gap-2">
+      <a href="{% url 'patient_detail' patient.pk %}" class="btn btn-secondary">Cancel</a>
+      <form method="post" style="display: inline;">
+        {% csrf_token %}
+        <button type="submit" class="btn btn-danger">Delete Permanently</button>
+      </form>
+    </div>
+  </div>
+</div>
+{% endblock %}
