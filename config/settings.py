@@ -84,9 +84,17 @@ STATICFILES_DIRS = [
 STATIC_ROOT = BASE_DIR.parent / "staticfiles"  # => pediatric-django/staticfiles/
 
 
-
+# Media files - Use Render persistent disk in production
 MEDIA_URL = '/media/'
-MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
+
+# Check if running on Render with persistent disk
+RENDER_DISK_PATH = config('RENDER_DISK_PATH', default=None)
+if RENDER_DISK_PATH:
+    # Use Render persistent disk mount point
+    MEDIA_ROOT = os.path.join(RENDER_DISK_PATH, 'media')
+else:
+    # Local development
+    MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 
 LOGIN_URL = 'login'
 LOGIN_REDIRECT_URL = 'dashboard'
