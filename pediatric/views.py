@@ -88,8 +88,24 @@ def dashboard(request):
 
 @login_required
 def patient_list(request):
-    """List all patients with search"""
+    """List all patients with search and sorting"""
     query = request.GET.get('q', '')
+    sort = request.GET.get('sort', 'date_registered')
+    order = request.GET.get('order', 'desc')
+    
+    # Valid sort fields
+    valid_sorts = {
+        'patient_name': 'patient_name',
+        'date_of_birth': 'date_of_birth',
+        'gender': 'gender',
+        'parent_name': 'parent_name',
+        'contact_number': 'contact_number',
+        'date_registered': 'date_registered'
+    }
+    
+    # Validate sort field
+    if sort not in valid_sorts:
+        sort = 'date_registered'
     
     patients = Patient.objects.all()
     
@@ -100,11 +116,15 @@ def patient_list(request):
             Q(parent_name__icontains=query)
         )
     
-    patients = patients.order_by('-date_registered')
+    # Apply sorting
+    order_prefix = '-' if order == 'desc' else ''
+    patients = patients.order_by(f'{order_prefix}{valid_sorts[sort]}')
     
     return render(request, 'patients/patient_list.html', {
         'patients': patients,
-        'query': query
+        'query': query,
+        'current_sort': sort,
+        'current_order': order
     })
 
 

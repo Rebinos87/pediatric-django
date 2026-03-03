@@ -20,11 +20,46 @@
     <table class="table table-hover mb-0">
       <thead class="table-light">
         <tr>
-          <th>Name</th>
-          <th>DOB</th>
-          <th>Gender</th>
-          <th>Parent</th>
-          <th>Phone</th>
+          <th>
+            <a href="?sort=patient_name&order={% if current_sort == 'patient_name' and current_order == 'asc' %}desc{% else %}asc{% endif %}{% if query %}&q={{ query }}{% endif %}" class="text-decoration-none text-dark">
+              Name
+              {% if current_sort == 'patient_name' %}
+                {% if current_order == 'asc' %}▲{% else %}▼{% endif %}
+              {% endif %}
+            </a>
+          </th>
+          <th>
+            <a href="?sort=date_of_birth&order={% if current_sort == 'date_of_birth' and current_order == 'asc' %}desc{% else %}asc{% endif %}{% if query %}&q={{ query }}{% endif %}" class="text-decoration-none text-dark">
+              DOB
+              {% if current_sort == 'date_of_birth' %}
+                {% if current_order == 'asc' %}▲{% else %}▼{% endif %}
+              {% endif %}
+            </a>
+          </th>
+          <th>
+            <a href="?sort=gender&order={% if current_sort == 'gender' and current_order == 'asc' %}desc{% else %}asc{% endif %}{% if query %}&q={{ query }}{% endif %}" class="text-decoration-none text-dark">
+              Gender
+              {% if current_sort == 'gender' %}
+                {% if current_order == 'asc' %}▲{% else %}▼{% endif %}
+              {% endif %}
+            </a>
+          </th>
+          <th>
+            <a href="?sort=parent_name&order={% if current_sort == 'parent_name' and current_order == 'asc' %}desc{% else %}asc{% endif %}{% if query %}&q={{ query }}{% endif %}" class="text-decoration-none text-dark">
+              Parent
+              {% if current_sort == 'parent_name' %}
+                {% if current_order == 'asc' %}▲{% else %}▼{% endif %}
+              {% endif %}
+            </a>
+          </th>
+          <th>
+            <a href="?sort=contact_number&order={% if current_sort == 'contact_number' and current_order == 'asc' %}desc{% else %}asc{% endif %}{% if query %}&q={{ query }}{% endif %}" class="text-decoration-none text-dark">
+              Phone
+              {% if current_sort == 'contact_number' %}
+                {% if current_order == 'asc' %}▲{% else %}▼{% endif %}
+              {% endif %}
+            </a>
+          </th>
         </tr>
       </thead>
       <tbody>
